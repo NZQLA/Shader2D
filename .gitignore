@@ -2,4 +2,11 @@ Assets/ReadMe.meta
 Assets/ReadMe/
 Library/
 Temp/
+VSCode/
+obj/
+Test*
+.*
+*.meta
+*.csproj
+*.sln
 ProjectSettings/ProjectVersion.txt
