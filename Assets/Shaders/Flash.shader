@@ -26,7 +26,7 @@ Shader "Custom/Flash"
         
         Pass
         {
-            Cull Off
+            Cull off
             Lighting Off
             ZWrite Off
             Fog { Mode Off }

@@ -5,7 +5,7 @@ Shader "Custom/Mosaic"
     Properties
     {
         _MainTex ("Base (RGB), Alpha (A)", 2D) = "black" {}
-        _SquareWidth("Square Width", Range(1, 30)) = 8
+        _SquareWidth("Square Width", Range(1, 300)) = 8
         _TexSize("Texture Size", vector) = (256,256,0,0)
     }
     
@@ -68,6 +68,10 @@ Shader "Custom/Mosaic"
                 float pixelX = int(IN.uv.x * _TexSize.x / _SquareWidth) * _SquareWidth;
                 float pixelY = int(IN.uv.y * _TexSize.y / _SquareWidth) * _SquareWidth;
                 float2 uv = float2(pixelX / _TexSize.x, pixelY / _TexSize.y);
+
+                // float pixelX = int(IN.uv.x * _SquareWidth);
+                // float pixelY = int(IN.uv.y * _SquareWidth);
+                // float2 uv = float2(pixelX / _SquareWidth, pixelY /_SquareWidth);
                 fixed4 col = tex2D(_MainTex, uv);
                 return col;
             }
@@ -75,32 +79,32 @@ Shader "Custom/Mosaic"
         }
     }
 
-    SubShader
-    {
-        LOD 100
+    // SubShader
+    // {
+    //     LOD 100
 
-        Tags
-        {
-            "Queue" = "Transparent"
-            "IgnoreProjector" = "True"
-            "RenderType" = "Transparent"
-        }
+    //     Tags
+    //     {
+    //         "Queue" = "Transparent"
+    //         "IgnoreProjector" = "True"
+    //         "RenderType" = "Transparent"
+    //     }
         
-        Pass
-        {
-            Cull Off
-            Lighting Off
-            ZWrite Off
-            Fog { Mode Off }
-            Offset -1, -1
-            ColorMask RGB
-            Blend SrcAlpha OneMinusSrcAlpha
-            ColorMaterial AmbientAndDiffuse
+    //     Pass
+    //     {
+    //         Cull Off
+    //         Lighting Off
+    //         ZWrite Off
+    //         Fog { Mode Off }
+    //         Offset -1, -1
+    //         ColorMask RGB
+    //         Blend SrcAlpha OneMinusSrcAlpha
+    //         ColorMaterial AmbientAndDiffuse
             
-            SetTexture [_MainTex]
-            {
-                Combine Texture * Primary
-            }
-        }
-    }
+    //         SetTexture [_MainTex]
+    //         {
+    //             Combine Texture * Primary
+    //         }
+    //     }
+    // }
 }

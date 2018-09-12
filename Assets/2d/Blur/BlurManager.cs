@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections;
+using  System.Reflection;
+
+
 public class BlurManager : MonoBehaviour {
     private float length = 3f;
     private float clearTime = -100;
@@ -30,5 +33,13 @@ public class BlurManager : MonoBehaviour {
         {
             blurTime = length;
         }
+    }
+
+
+
+    void Temp()
+    {
+        PropertyInfo info = null;
+
     }
 }
