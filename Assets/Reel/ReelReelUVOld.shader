@@ -1,11 +1,19 @@
 // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 // 卷轴收起Shader，以卷动的方式将一个平整的片卷起来，只有一个卷，
-//可配置卷的角度(0,360)
+// 处理方式：UV变换
+// 卷动部分随着时间向右推移，渲染分3种情况
+//  1. 卷动部分后面的剪掉，步渲染
+//  2. 卷动所在的部分，对UV进行处理，并使用指定的背面纹理进行渲染
+//  3. 卷动前面的部分，不做任何处理，照常渲染
+
+
 Shader "Custom/Reel"
 {
     Properties
     {
         _MainTex ("Base (RGB), Alpha (A)", 2D) = "black" {}
+        _BackTex ("Base (RGB), Alpha (A)", 2D) = "black" {}
+
         _Color("Color", Color) = (1,1,1,1)
         _AngleMaxMax("AngleMax", Range(0, 360)) = 360
         _Ridus("ridus 卷轴半径", Range(0, 0.159)) = 0.015
@@ -18,19 +26,15 @@ Shader "Custom/Reel"
 
         Tags
         {
-            "Queue" = "Transparent"
+            "RenderType" = "Opaque"
             "IgnoreProjector" = "True"
-            "RenderType" = "Transparent"
         }
         
         Pass
         {
-            Cull off
+            Cull Back
             Lighting Off
-            ZWrite Off
             Fog { Mode Off }
-            Offset -1, -1
-            Blend SrcAlpha OneMinusSrcAlpha
 
             CGPROGRAM
             #pragma vertex vert
@@ -39,6 +43,9 @@ Shader "Custom/Reel"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            sampler2D _BackTex;
+            float4 _BackTex_ST;
+
             float4 _Color;
             float _AngleMaxMax;
             float _Ridus;
@@ -67,7 +74,7 @@ Shader "Custom/Reel"
     
 
 
-
+            // 用于计算卷动部分的边界(这里指的是左右边界)
             void CaculateBorder()
             {
                 _lenMax = _AngleMaxMax*0.0174532924*_Ridus;
@@ -76,7 +83,8 @@ Shader "Custom/Reel"
                 _right = _left + _lenMax;
             }
 
-            float2 CaculateCurUV(half2 uv)
+            // 计算卷动部分的UV
+            float2 CaculateReelPartUV(half2 uv)
             {
                 if(uv.x>=_left&&uv.x<=_right)
                 {
@@ -119,8 +127,18 @@ Shader "Custom/Reel"
             {
                 CaculateBorder();
                 clip(i.texcoord.x - _left);
-                i.texcoord = CaculateCurUV(i.texcoord);
-                float4 col = tex2D(_MainTex, i.texcoord);
+                float4 col;
+                // 对于在卷动的部分使用背面纹理渲染
+                if(i.texcoord.x>=_left&&i.texcoord.x<=_right)
+                {
+                    i.texcoord = CaculateReelPartUV(i.texcoord);
+                    col = tex2D(_BackTex, i.texcoord);
+                }
+                // 对于未被卷动的部分不做任何处理
+                else
+                {
+                    col = tex2D(_MainTex, i.texcoord);
+                }
 
                 // // 对卷动部分进行颜色叠加处理
                 // if(i.texcoord.x>=_left&&i.texcoord.x<=_right)
